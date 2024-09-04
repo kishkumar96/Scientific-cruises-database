@@ -1,0 +1,17 @@
+<layer>
+  <name>cruises_position</name>
+  <id>LayerInfoImpl--1021d966:191b5781752:-7fee</id>
+  <type>VECTOR</type>
+  <defaultStyle>
+    <id>StyleInfoImpl--1021d966:191b5781752:-7ffc</id>
+  </defaultStyle>
+  <resource class="featureType">
+    <id>FeatureTypeInfoImpl--1021d966:191b5781752:-7fef</id>
+  </resource>
+  <attribution>
+    <logoWidth>0</logoWidth>
+    <logoHeight>0</logoHeight>
+  </attribution>
+  <dateCreated>2024-09-03 01:42:32.766 UTC</dateCreated>
+  <dateModified>2024-09-03 02:27:28.150 UTC</dateModified>
+</layer>

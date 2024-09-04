@@ -1,0 +1,118 @@
+/* CruiseDetailPage.css */
+
+.cruise-detail-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.cruise-detail-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.cruise-detail-header h1 {
+  font-size: 2.5rem;
+  color: #003366; /* Dark blue for better contrast */
+  font-weight: 700;
+}
+
+.cruise-detail-header img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px; /* Soft rounded corners for the image */
+}
+
+.cruise-detail-header div {
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: left;
+  width: 100%;
+  max-width: 600px; /* Max width for the vessel information */
+}
+
+.cruise-detail-header p,
+.cruise-detail-header a {
+  color: #003366;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin: 0.5rem 0;
+}
+
+.cruise-detail-header a {
+  text-decoration: none;
+  color: #007bff;
+}
+
+.main-content {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+.cruise-detail-section {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.cruise-detail-section h2 {
+  color: #003366;
+  border-bottom: 2px solid #eeeeee;
+  padding-bottom: 10px;
+}
+
+/* Table styles */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+
+table th,
+table td {
+  padding: 15px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+table th {
+  background-color: #f8f8f8;
+  color: #003366;
+  font-weight: 600;
+}
+
+/* Responsive layout */
+@media (max-width: 768px) {
+  .cruise-detail-header {
+      flex-direction: column;
+  }
+
+  .cruise-detail-header img {
+      max-width: 100%;
+  }
+
+  .cruise-detail-header div {
+      width: 100%;
+  }
+
+  .main-content {
+      grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 1024px) {
+  .main-content {
+      grid-template-columns: repeat(2, 1fr);
+  }
+
+  .cruise-detail-section {
+      padding: 30px;
+  }
+}

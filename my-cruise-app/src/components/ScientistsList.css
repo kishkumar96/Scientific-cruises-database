@@ -1,0 +1,32 @@
+.scientists-container {
+  overflow-x: auto;
+  margin: 1em 0;
+  padding: 0 1em;
+}
+
+.scientists-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+.scientists-table th,
+.scientists-table td {
+  padding: 0.75em;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.scientists-table th {
+  background: #f8f9fa;
+  color: #333;
+  font-weight: bold;
+}
+
+.scientists-table tr:nth-child(odd) {
+  background-color: #f8f9fa;
+}
+
+.scientists-table tr:hover {
+  background-color: #e9ecef;
+}

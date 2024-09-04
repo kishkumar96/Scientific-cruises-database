@@ -1,0 +1,35 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #003366; /* Dark blue */
+  color: #ffffff;
+  padding: 10px 20px;
+}
+
+.header .logo {
+  font-weight: bold;
+  font-size: 20px;
+}
+
+nav a {
+  color: #ffffff;
+  text-decoration: none;
+  margin: 0 10px;
+}
+
+nav a:hover {
+  text-decoration: underline;
+}
+
+/* Styles for the Admin Login button */
+nav .admin-login {
+  background-color: #007bff; /* Bootstrap primary button color */
+  padding: 5px 15px;
+  border-radius: 5px;
+  margin-left: auto; /* Pushes the login button to the far right */
+}
+
+nav .admin-login:hover {
+  background-color: #0056b3; /* A darker blue for hover state */
+}

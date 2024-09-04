@@ -1,0 +1,55 @@
+<GeoServerTileLayer>
+  <id>LayerInfoImpl--1021d966:191b5781752:-7ff0</id>
+  <enabled>true</enabled>
+  <inMemoryCached>true</inMemoryCached>
+  <name>cruise:cruises_route</name>
+  <mimeFormats>
+    <string>image/png</string>
+    <string>image/jpeg</string>
+  </mimeFormats>
+  <gridSubsets>
+    <gridSubset>
+      <gridSetName>EPSG:4326</gridSetName>
+      <extent>
+        <coords>
+          <double>-1.009994387626648</double>
+          <double>-1.009471416473389</double>
+          <double>1.008885979652405</double>
+          <double>1.009316086769104</double>
+        </coords>
+      </extent>
+    </gridSubset>
+    <gridSubset>
+      <gridSetName>EPSG:900913</gridSetName>
+      <extent>
+        <coords>
+          <double>-112432.06093466263</double>
+          <double>-112379.65825904401</double>
+          <double>112308.67352337869</double>
+          <double>112362.36435179377</double>
+        </coords>
+      </extent>
+    </gridSubset>
+  </gridSubsets>
+  <metaWidthHeight>
+    <int>4</int>
+    <int>4</int>
+  </metaWidthHeight>
+  <expireCache>0</expireCache>
+  <expireClients>0</expireClients>
+  <parameterFilters>
+    <styleParameterFilter>
+      <key>STYLES</key>
+      <defaultValue></defaultValue>
+      <allowedStyles class="sorted-set">
+        <string>cruise:CruiseRoute</string>
+      </allowedStyles>
+      <availableStyles class="sorted-set">
+        <string>cruise:CruiseRoute</string>
+      </availableStyles>
+      <defaultStyle>cruise:CruiseRoute</defaultStyle>
+    </styleParameterFilter>
+  </parameterFilters>
+  <gutter>0</gutter>
+  <cacheWarningSkips/>
+</GeoServerTileLayer>

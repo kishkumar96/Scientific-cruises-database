@@ -1,0 +1,28 @@
+/* LegTable.css - Styles for the leg table */
+
+.legs-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1em;
+}
+
+.legs-table th,
+.legs-table td {
+  padding: 8px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+.legs-table th {
+  background-color: #f4f4f4;
+}
+
+/* Zebra striping for tables */
+.legs-table tr:nth-child(odd) {
+  background-color: #f9f9f9;
+}
+
+/* Hover effect for table rows */
+.legs-table tr:hover {
+  background-color: #f0f0f0;
+}

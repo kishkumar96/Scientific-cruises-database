@@ -1,0 +1,111 @@
+services:
+  db:
+    image: postgis/postgis:${POSTGIS_VERSION_TAG}
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - backend
+    healthcheck:
+      test: "PGPASSWORD=${POSTGRES_PASSWORD} pg_isready -h 127.0.0.1 -U ${POSTGRES_USER} -d ${POSTGRES_DB}"
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 1m
+
+  geoserver:
+    image: kartoza/geoserver:${GS_VERSION}
+    environment:
+      GEOSERVER_DATA_DIR: /var/geoserver_data/data
+      GEOSERVER_ADMIN_PASSWORD: ${GEOSERVER_ADMIN_PASSWORD}
+    volumes:
+      - ./geoserver_data:/var/geoserver_data/data
+    networks:
+      - backend
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: db
+      DB_PORT: ${POSTGRES_PORT}
+      DEBUG: ${DEBUG}
+      DJANGO_ALLOWED_HOSTS: "*"
+    volumes:
+      - ./staticfiles://pacific_cruises/staticfiles
+      - ./media:/pacific_cruises/pacific_cruises/media/
+    networks:
+      - backend
+    depends_on:
+      - db
+    restart: on-failure
+
+  rabbitmq:
+    image: rabbitmq:3-alpine
+    volumes:
+      - rabbitmq:/var/lib/rabbitmq
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+    networks:
+      - backend
+
+  celery:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL}
+      DJANGO_SETTINGS_MODULE: pacific_cruises.settings
+    depends_on:
+      - rabbitmq
+      - db
+    user: "1001:1001"
+    restart: always
+    networks:
+      - backend
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    restart: on-failure
+    environment:
+      REDIS_URL: ${REDIS_URL}
+    networks:
+      - backend
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"  # Expose port 80 to handle HTTP requests from outside
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf  # Use custom NGINX configuration
+      - ./staticfiles:/pacific_cruises/staticfiles
+      - ./media:/pacific_cruises/pacific_cruises/media/
+    depends_on:
+      - web
+      - geoserver
+    networks:
+      - backend
+      - frontend
+
+networks:
+  backend:
+  frontend:
+
+volumes:
+  pgdata:
+  rabbitmq:
+  geoserver_data:

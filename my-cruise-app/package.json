@@ -1,0 +1,64 @@
+{
+  "name": "my-cruise-app",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@babel/core": "^7.25.2",
+    "@babel/plugin-transform-class-properties": "^7.24.7",
+    "@sideway/address": "^5.0.0",
+    "@testing-library/jest-dom": "^6.4.6",
+    "@testing-library/react": "^16.0.0",
+    "@testing-library/user-event": "^14.5.2",
+    "chokidar": "^3.6.0",
+    "eslint": "^8.57.0",
+    "i18n-iso-countries": "^7.11.2",
+    "joi": "^17.13.3",
+    "leaflet": "^1.9.4",
+    "ol": "^10.0.0",
+    "proj4": "^2.11.0",
+    "react": "^18.3.1",
+    "react-country-flag": "^3.1.0",
+    "react-dom": "^18.3.1",
+    "react-leaflet": "^4.2.1",
+    "react-router-dom": "^6.24.1",
+    "react-scripts": "^5.0.1",
+    "typescript": "^5.5.4",
+    "web-vitals": "^4.2.1"
+  },
+  "scripts": {
+    "start": "NODE_OPTIONS=--openssl-legacy-provider react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@babel/eslint-parser": "^7.24.7",
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "@babel/plugin-transform-runtime": "^7.24.7",
+    "@babel/preset-env": "^7.24.7",
+    "@babel/preset-react": "^7.24.7",
+    "babel-plugin-transform-class-properties": "^6.10.2",
+    "customize-cra": "^1.0.0",
+    "eslint-config-react-app": "^7.0.1",
+    "react-app-rewired": "^2.2.1",
+    "react-openlayers": "^0.1.9"
+  }
+}
