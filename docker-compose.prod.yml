@@ -18,8 +18,6 @@ services:
 
   geoserver:
     image: kartoza/geoserver:${GS_VERSION}
-    ports:
-      - "8080:8080"
     environment:
       GEOSERVER_DATA_DIR: /var/geoserver_data/data
       GEOSERVER_ADMIN_PASSWORD: ${GEOSERVER_ADMIN_PASSWORD}
@@ -35,10 +33,6 @@ services:
     image: rabbitmq:3-alpine
     volumes:
       - rabbitmq:/var/lib/rabbitmq
-    restart: always
-    environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
     networks:
       - backend
 
@@ -49,13 +43,11 @@ services:
     environment:
       CELERY_BROKER_URL: ${CELERY_BROKER_URL}
       DJANGO_SETTINGS_MODULE: pacific_cruises.settings
+    networks:
+      - backend
     depends_on:
       - rabbitmq
       - db
-    user: "1001:1001"
-    restart: always
-    networks:
-      - backend
 
   web:
     build:
@@ -68,68 +60,45 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
       DB_HOST: db
       DB_PORT: ${POSTGRES_PORT}
-      DEBUG: ${DEBUG}
-      DJANGO_ALLOWED_HOSTS: "*"
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_DB: ${POSTGRES_DB}
-     
-
+      DEBUG: 0
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS}
     volumes:
-      - static_volume:/staticfiles/
-      - .:/code
-      - media_volume:/media/
+      - ./staticfiles:/staticfiles
+      - ./media:/pacific_cruises/media/
     networks:
       - backend
+    depends_on:
+      - db
     restart: on-failure
-    working_dir: /code  # Ensure this is set correctly
 
   redis:
     image: redis:alpine
     ports:
       - "6379:6379"
-    restart: on-failure
-    environment:
-      REDIS_URL: ${REDIS_URL}
     networks:
       - backend
 
   nginx:
-    image: nginx:1.25
+    image: nginx:alpine
     volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./staticfiles:/staticfiles
+      - ./media:/pacific_cruises/media/
       - ./my-cruise-app/build:/pacific_cruises/my-cruise-app/build
-      - ./nginx_cache:/var/cache/nginx
-      - ./ssl/nginx.crt:/etc/nginx/ssl/nginx.crt
-      - ./ssl/nginx.key:/etc/nginx/ssl/nginx.key
     ports:
       - "80:80"
-      - "443:443"  # Expose HTTPS port
     depends_on:
+      - web
       - geoserver
     networks:
       - backend
       - frontend
 
+networks:
+  backend:
+  frontend:
+
 volumes:
   pgdata:
   rabbitmq:
   geoserver_data:
-  static_volume:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ./staticfiles  # Mapping host-side staticfiles directory
-  media_volume:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ./media  # Mapping host-side media directory
-
-networks:
-  backend:
-  frontend:
-    external: true
-
-version: '3.8'

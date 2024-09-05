@@ -151,7 +151,7 @@ exec gunicorn pacific_cruises.wsgi:application --bind 0.0.0.0:8000 &
 
 # Start GeoServer
 echo "Starting GeoServer..."
-if [[ ${RUN_AS_ROOT} =~ [Ff][Aa][Ll][Ss][Ee] ]];then
+if [[ ${RUN_AS_ROOT} =~ [Ff][Aa][Ll][Ss][Ee] ]]; then
   if [[ -f ${GEOSERVER_HOME}/start.jar ]]; then
     exec gosu "${USER_NAME}" "${GEOSERVER_HOME}"/bin/startup.sh
   else
@@ -159,8 +159,8 @@ if [[ ${RUN_AS_ROOT} =~ [Ff][Aa][Ll][Ss][Ee] ]];then
   fi
 else
   if [[ -f ${GEOSERVER_HOME}/start.jar ]]; then
-    exec  "${GEOSERVER_HOME}"/bin/startup.sh
+    exec "${GEOSERVER_HOME}"/bin/startup.sh
   else
-    exec  /usr/local/tomcat/bin/catalina.sh run
+    exec /usr/local/tomcat/bin/catalina.sh run
   fi
 fi
