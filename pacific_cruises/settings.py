@@ -8,26 +8,22 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'default-secret-key')
+# In development, you can use a simple, non-secret key
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'development-secret-key') 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-#DEBUG = os.getenv('DJANGO_DEBUG', 'True') == 'True'
-#DEBUG = os.getenv('DJANGO_DEBUG', '0') == '1'
-DEBUG= True
-CSRF_COOKIE_DOMAIN = 'cruisedb.corp.spc.int'
-CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = True
-SECURE_BROWSER_XSS_FILTER = True
-CORS_ALLOW_CREDENTIALS = True
+# For development, enable debugging and disable security features
+DEBUG = True
+CSRF_COOKIE_DOMAIN = None  # Disable CSRF cookie domain restriction in development
+CSRF_COOKIE_SECURE = False 
+SESSION_COOKIE_SECURE = False
+SECURE_BROWSER_XSS_FILTER = False
 
-ALLOWED_HOSTS = ['cruisedb.corp.spc.int', 'localhost', '127.0.0.1']
-CSRF_TRUSTED_ORIGINS = [
-    'http://cruisedb.corp.spc.int',
-    'https://cruisedb.corp.spc.int'
-]
+# Allow all hosts during development for easier testing
+ALLOWED_HOSTS = ['*']  
+CSRF_TRUSTED_ORIGINS = ['*']  # Allow all origins for CSRF in development
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -36,8 +32,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
-    'django.contrib.gis',
-    'cruises',
+    'django.contrib.gis',  # PostGIS
+    'cruises',  # Your custom app
     'corsheaders',
     'rest_framework',
     'django_seed',
@@ -67,12 +63,14 @@ LEAFLET_CONFIG = {
     'CRS': 'EPSG4326',
 }
 
+# Django REST Framework configuration
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
     ],
 }
 
+# Middleware
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -85,10 +83,13 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 ]
 
+# URL configuration
 ROOT_URLCONF = 'pacific_cruises.urls'
+
+# Static files storage using WhiteNoise for development
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-
+# Templates configuration
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -105,17 +106,19 @@ TEMPLATES = [
     },
 ]
 
+# WSGI application
 WSGI_APPLICATION = 'pacific_cruises.wsgi.application'
 
 # Database configuration
+# Ensure your development database settings are correct
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT'),
+        'NAME': os.getenv('POSTGRES_DB'),
+        'USER': os.getenv('POSTGRES_USER'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+        'HOST': os.getenv('POSTGRES_HOST'),
+        'PORT': os.getenv('POSTGRES_PORT'),
     }
 }
 
@@ -148,19 +151,16 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'my-cruise-app/build/static'),
 ]
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # CORS settings
+# Allow all origins for CORS in development
 CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOWED_ORIGINS = [
-    'https://cruisedb.corp.spc.int',
-    'http://localhost',
-    'http://127.0.0.1'
-]
+
 # CORS preflight responses
 CORS_ALLOW_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
-
 CORS_ALLOW_HEADERS = [
     'content-type',
     'authorization',
@@ -184,7 +184,8 @@ CACHES = {
 }
 
 # Celery configuration
-CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'amqp://guest:guest@rabbitmq:5672//')
+# If you're using Celery in development, adjust the broker URL if needed
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'amqp://guest:guest@localhost:5672//')
 CELERY_RESULT_BACKEND = 'django-db'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
