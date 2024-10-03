@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 import 'ol/ol.css';
 import Map from 'ol/Map';
 import View from 'ol/View';
@@ -7,64 +7,119 @@ import OSM from 'ol/source/OSM';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import GeoJSON from 'ol/format/GeoJSON';
+import Style from 'ol/style/Style';
+import Stroke from 'ol/style/Stroke';
+import Icon from 'ol/style/Icon';
+import Feature from 'ol/Feature';
+import Point from 'ol/geom/Point';
 
-const MapComponent = () => {
-  const mapRef = useRef(null); // Use useRef to store the map instance
+const generateRandomColor = () => {
+  const letters = '0123456789ABCDEF';
+  let color = '#';
+  for (let i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+};
+
+const CruiseListMap = () => {
+  const mapContainerRef = useRef();
+  const colorCache = useRef({});
+
+  const getCruiseColor = useCallback((cruiseId) => {
+    if (!colorCache.current[cruiseId]) {
+      colorCache.current[cruiseId] = generateRandomColor();
+    }
+    return colorCache.current[cruiseId];
+  }, []);
 
   useEffect(() => {
-    const initMap = new Map({
-      target: 'map',
+    const map = new Map({
+      target: mapContainerRef.current,
       layers: [
         new TileLayer({
-          source: new OSM({
-            wrapX: true, 
-          }),
+          source: new OSM(),
         }),
       ],
       view: new View({
         center: [0, 0],
         zoom: 2,
+        minZoom: 2,
+        maxZoom: 14,
       }),
     });
 
-    mapRef.current = initMap; // Store the map in the ref
-
-    return () => {
-      mapRef.current.setTarget(undefined); // Clean up on unmount
-    };
-  }, []);
-
-  useEffect(() => {
-    const map = mapRef.current; // Get the map from the ref
-    if (map) {
-      fetch('http://localhost:8081/geoserver/cruise/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=cruise:cruises_route&outputFormat=application/json')
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+    const fetchGeoServerData = async () => {
+      try {
+        const response = await fetch(`https://cruisedb.corp.spc.int/geoserver/cruise/wfs?service=WFS&version=2.0.0&request=GetFeature&typeName=cruise:cruises_route&outputFormat=application/json`);
+        if (!response.ok) {
+          if (response.status === 404) {
+            throw new Error('Cruise route data not found.');
+          } else {
+            throw new Error(`GeoServer data fetch failed: ${response.status}`);
           }
-          return response.json();
-        })
-        .then((data) => {
-          const vectorSource = new VectorSource({
-            features: new GeoJSON().readFeatures(data, {
-              featureProjection: 'EPSG:3857', 
-            }),
-            wrapX: true, 
-          });
+        }
+        const data = await response.json();
 
-          const vectorLayer = new VectorLayer({
-            source: vectorSource,
-          });
-
-          map.addLayer(vectorLayer);
-        })
-        .catch((error) => {
-          console.error('Error fetching GeoServer data:', error);
+        const vectorSource = new VectorSource({
+          features: new GeoJSON().readFeatures(data, {
+            featureProjection: 'EPSG:3857',
+          }),
         });
-    }
-  }, []); // Empty dependency array ensures this runs only once after the map is initialized
 
-  return <div id="map" style={{ height: '400px', width: '100%' }} />;
+        const vectorLayer = new VectorLayer({
+          source: vectorSource,
+          style: function (feature) {
+            const cruiseId = feature.get('cruise_id');
+            const cruiseColor = getCruiseColor(cruiseId);
+
+            // Handle MultiLineString and LineString geometries
+            const coordinates = feature.getGeometry().getType() === 'MultiLineString'
+              ? feature.getGeometry().getCoordinates()[0]
+              : feature.getGeometry().getCoordinates();
+            const startPoint = coordinates[0];
+            const endPoint = coordinates[coordinates.length - 1];
+
+            // Create start and end vertex icons
+            const startVertex = new Feature({
+              geometry: new Point(startPoint),
+            });
+            const endVertex = new Feature({
+              geometry: new Point(endPoint),
+            });
+
+            const arrowIcon = new Icon({
+              src: 'https://example.com/path/to/arrow-icon.png', // Update this URL
+              scale: 0.5,
+              rotation: 0,
+            });
+
+            startVertex.setStyle(new Style({ image: arrowIcon }));
+            endVertex.setStyle(new Style({ image: arrowIcon }));
+
+            return new Style({
+              stroke: new Stroke({
+                color: cruiseColor,
+                width: 2,
+                lineDash: [4, 4], // Dotted line
+              }),
+            });
+          },
+        });
+
+        map.addLayer(vectorLayer);
+      } catch (error) {
+        console.error('Error fetching route from GeoServer:', error);
+        alert(error.message || 'Unable to fetch route data. Please try again later.');
+      }
+    };
+
+    fetchGeoServerData();
+
+    return () => map.setTarget(undefined);
+  }, [getCruiseColor]);
+
+  return <div ref={mapContainerRef} style={{ height: '600px', width: '100%' }} />;
 };
 
-export default MapComponent;
+export default CruiseListMap;

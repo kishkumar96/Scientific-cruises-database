@@ -1,6 +1,7 @@
 import React from 'react';
 import './ScientistsList.css';
 
+
 const ScientistsList = ({ scientists }) => {
     if (!Array.isArray(scientists) || scientists.length === 0) {
         return <p>No scientists found for this cruise.</p>;

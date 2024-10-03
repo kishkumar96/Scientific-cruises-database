@@ -157,3 +157,5 @@ scenario_tests/gwc/tests/__pycache__*
 scenario_tests/login/tests/__pycache__*
 scenario_tests/stores/tests/__pycache__*
 scenario_tests/libjpeg/tests/__pycache__*
+node_modules
+node_modules

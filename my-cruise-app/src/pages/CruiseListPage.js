@@ -1,17 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import MapComponent from '../components/maps/CruiseListMap';
+import MapComponent from '../components/maps/CruiseListMap'; // Corrected path
 import CountryFlag from 'react-country-flag';
-import Tooltip from '../components/Tooltip';
-import './CruiseListPage.css';
+import Tooltip from '../components/Tooltip'; // Corrected path for Tooltip
+import './CruiseListPage.css'; // Keep this as it is, since it's in the same directory as CruiseListPage.js
 import countries from 'i18n-iso-countries';
 
 countries.registerLocale(require('i18n-iso-countries/langs/en.json'));
 
-// Pagination component to handle page numbers
 const Pagination = ({ totalItems, itemsPerPage, currentPage, onPageChange }) => {
     const totalPages = Math.ceil(totalItems / itemsPerPage);
-    if (totalPages <= 1) return null; // No pagination needed if there's only one page
+    if (totalPages <= 1) return null;
 
     return (
         <div className="pagination">
@@ -28,31 +27,80 @@ const Pagination = ({ totalItems, itemsPerPage, currentPage, onPageChange }) => 
     );
 };
 
+/**
+ * CruiseListPage component renders a list of scientific cruises with search and filter functionalities.
+ * It also provides pagination and navigation to cruise details.
+ *
+ * @component
+ * @example
+ * return (
+ *   <CruiseListPage />
+ * )
+ *
+ * @returns {JSX.Element} The rendered CruiseListPage component.
+ *
+ * @typedef {Object} Cruise
+ * @property {string} cruise_id - The unique identifier for the cruise.
+ * @property {string} cruise_name - The name of the cruise.
+ * @property {string} status_name - The status of the cruise.
+ * @property {string} iso2_country - The ISO 3166-1 alpha-2 code of the country.
+ * @property {Object} vessel_details - The details of the vessel.
+ * @property {string} vessel_details.vessel_name - The name of the vessel.
+ * @property {Array} legs - The legs of the cruise.
+ * @property {Object} legs[0] - The first leg of the cruise.
+ * @property {string} legs[0].start_date - The start date of the first leg.
+ * @property {Object} legs[legs.length - 1] - The last leg of the cruise.
+ * @property {string} legs[legs.length - 1].end_date - The end date of the last leg.
+ *
+ * @typedef {Object} Status
+ * @property {string} id - The unique identifier for the status.
+ * @property {string} name - The name of the status.
+ *
+ * @typedef {Object} Filters
+ * @property {string} status - The status filter.
+ *
+ * @typedef {Object} PaginationProps
+ * @property {number} totalItems - The total number of items.
+ * @property {number} itemsPerPage - The number of items per page.
+ * @property {number} currentPage - The current page number.
+ * @property {function} onPageChange - The function to handle page change.
+ */
 const CruiseListPage = () => {
     const [activeTab, setActiveTab] = useState('list');
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(10);
     const [searchTerm, setSearchTerm] = useState('');
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
     const [filters, setFilters] = useState({ status: '' });
     const [cruises, setCruises] = useState([]);
     const [statuses, setStatuses] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
+    const apiUrl = process.env.REACT_APP_API_URL || 'https://cruisedb.corp.spc.int/api';
 
-    const handleSearchChange = (e) => setSearchTerm(e.target.value);
+    const handleSearchChange = (e) => setDebouncedSearchTerm(e.target.value);
 
-    const getCountryName = (isoCode) => {
+    const getCountryName = useCallback((isoCode) => {
         return countries.getName(isoCode, "en", { select: "official" }) || 'No country';
-    };
+    }, []);
 
-    // Filter cruises based on search term and status filter
-    const filteredCruises = cruises.filter(cruise => {
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setSearchTerm(debouncedSearchTerm);
+        }, 300);
+
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [debouncedSearchTerm]);
+
+    const filteredCruises = useMemo(() => cruises.filter(cruise => {
         const name = cruise.cruise_name.toLowerCase();
         const status = cruise.status_name;
         return name.includes(searchTerm.toLowerCase()) &&
             (!filters.status || status === filters.status);
-    });
+    }), [cruises, searchTerm, filters.status]);
 
     const indexOfLastCruise = currentPage * itemsPerPage;
     const indexOfFirstCruise = indexOfLastCruise - itemsPerPage;
@@ -60,45 +108,40 @@ const CruiseListPage = () => {
 
     const handlePageChange = pageNumber => setCurrentPage(pageNumber);
     const handleSeeDetails = id => navigate(`/cruises/${id}`);
-    const apiUrl = process.env.REACT_APP_API_URL;
 
-    // Fetch cruises data
     useEffect(() => {
         const fetchCruises = async () => {
             try {
-                const response = await fetch('${apiUrl}/api/cruises/', {
+                const response = await fetch(`${apiUrl}/cruises/`, {
                     headers: { 'Accept': 'application/json' }
                 });
                 if (!response.ok) throw new Error(`Failed to fetch cruises. Status: ${response.status}`);
                 const data = await response.json();
                 setCruises(data);
             } catch (error) {
-                console.error('Error fetching cruises:', error);
                 setError('An error occurred while loading cruises. Please try again later.');
             } finally {
                 setLoading(false);
             }
         };
         fetchCruises();
-    }, []);
+    }, [apiUrl]);
 
-    // Fetch statuses data
     useEffect(() => {
         const fetchStatuses = async () => {
             try {
-                const response = await fetch('${apiUrl}/api/statuses/', {
+                const response = await fetch(`${apiUrl}/statuses/`, {
                     headers: { 'Accept': 'application/json' }
                 });
                 if (!response.ok) throw new Error(`Failed to fetch statuses. Status: ${response.status}`);
                 const data = await response.json();
                 setStatuses(data);
             } catch (error) {
-                console.error('Error fetching statuses:', error);
                 setError('An error occurred while loading statuses. Please try again later.');
             }
         };
         fetchStatuses();
-    }, []);
+    }, [apiUrl]);
 
     return (
         <div className="cruise-list-container">

@@ -1,28 +1,18 @@
 #!/bin/bash
-set -e
 
-echo "Starting PostgreSQL service..."
-# Start the PostgreSQL service
-pg_ctlcluster 16 main start
+# Variables
+DB_CONTAINER_NAME=$(docker-compose ps -q db)
+DB_USER="postgres"
+DB_NAME="cruise"
+DB_PASSWORD="postgres123"
+BACKUP_FILE="cruise_backup.dump"
 
-echo "Waiting for PostgreSQL to be available..."
-# Wait for the PostgreSQL service to be available
-until pg_isready -U postgres -d cruise; do
-  echo "PostgreSQL is unavailable - sleeping"
-  sleep 2
-done
+# Drop the existing database and recreate it
+docker exec -it $DB_CONTAINER_NAME bash -c "PGPASSWORD=$DB_PASSWORD dropdb -U $DB_USER $DB_NAME"
+docker exec -it $DB_CONTAINER_NAME bash -c "PGPASSWORD=$DB_PASSWORD createdb -U $DB_USER $DB_NAME"
 
-echo "Restoring the database from the dump file..."
-# Restore the database from the dump file
-if pg_restore -U postgres -d cruise /docker-entrypoint-initdb.d/cruise_backup.dump; then
-  echo "Database restored successfully."
-else
-  echo "Database restoration failed." >&2
-  exit 1
-fi
+# Copy the backup file to the database container
+docker cp $BACKUP_FILE $DB_CONTAINER_NAME:/tmp/$BACKUP_FILE
 
-echo "Stopping PostgreSQL service..."
-# Stop the PostgreSQL service after the restoration
-pg_ctlcluster 16 main stop
-
-echo "PostgreSQL service stopped."
+# Restore the database
+docker exec -it $DB_CONTAINER_NAME bash -c "PGPASSWORD=$DB_PASSWORD pg_restore --clean --if-exists -U $DB_USER -d $DB_NAME -v /tmp/$BACKUP_FILE"
