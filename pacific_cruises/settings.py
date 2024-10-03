@@ -9,20 +9,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # In development, you can use a simple, non-secret key
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'development-secret-key') 
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'development-secret-key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# For development, enable debugging and disable security features
-DEBUG = True
-CSRF_COOKIE_DOMAIN = None  # Disable CSRF cookie domain restriction in development
-CSRF_COOKIE_SECURE = False 
-SESSION_COOKIE_SECURE = False
-SECURE_BROWSER_XSS_FILTER = False
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
 # Allow all hosts during development for easier testing
-ALLOWED_HOSTS = ['*']  
-CSRF_TRUSTED_ORIGINS = ['*']  # Allow all origins for CSRF in development
+ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', '*').split(',')
 
+# Correctly load CSRF_TRUSTED_ORIGINS from environment variables
+CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',')
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -40,10 +36,9 @@ INSTALLED_APPS = [
     'rest_framework_gis',
     'import_export',
     'leaflet',
-    'django_celery_results',  # Celery results backend
+    'django_celery_results',
 ]
 
-# Leaflet configuration
 LEAFLET_CONFIG = {
     'DEFAULT_CENTER': (0, 0),
     'DEFAULT_ZOOM': 3,
@@ -121,7 +116,10 @@ DATABASES = {
         'PORT': os.getenv('POSTGRES_PORT'),
     }
 }
+# settings.py
 
+# Add this line at the end of the file or in an appropriate section
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {
