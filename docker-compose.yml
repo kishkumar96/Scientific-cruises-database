@@ -25,8 +25,13 @@ services:
     ports:
       - "8080:8080"
     environment:
-      GEOSERVER_ADMIN_USER: ${GEOSERVER_ADMIN_USER:-admin}
-      GEOSERVER_ADMIN_PASSWORD: ${GEOSERVER_ADMIN_PASSWORD:-geoserver}
+      GEOWEBCACHE_CACHE_DIR: /opt/geoserver/data_dir/gwc
+      INITIAL_MEMORY: 4G
+      Max_MEMORY: 8G
+      RESET_ADMIN_CREDENTIALS: TRUE
+
+      GEOSERVER_ADMIN_USER: admin
+      GEOSERVER_ADMIN_PASSWORD: myawesomegeoserver
       GEOSERVER_PROXY_BASE_URL: https://cruisedb.corp.spc.int/geoserver
     volumes:
       - kartoza_geoserver_data:/opt/geoserver/data_dir
@@ -45,7 +50,7 @@ services:
       args:
         USER_ID: ${UID:-1000}
         GROUP_ID: ${GID:-1000}
-    command: gunicorn --bind 0.0.0.0:8000 --workers 3 pacific_cruises.wsgi:application
+    command: gunicorn --bind 0.0.0.0:8000 --workers 9 pacific_cruises.wsgi:application
     env_file:
       - .env
     ports:
@@ -60,6 +65,8 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+    volumes:
+      - static_volume:/code/staticfiles
 
   celery:
     build:
@@ -68,7 +75,7 @@ services:
       args:
         USER_ID: ${UID:-1000}
         GROUP_ID: ${GID:-1000}
-    command: celery -A pacific_cruises worker --loglevel=info
+    command: celery -A pacific_cruises worker --loglevel=info --prefetch-multiplier=1 --concurrency=4
     env_file:
       - .env
     depends_on:
@@ -83,6 +90,7 @@ services:
 
   redis:
     image: redis:alpine
+    command: redis-server --appendonly yes
     restart: unless-stopped
     ports:
       - "6379:6379"
