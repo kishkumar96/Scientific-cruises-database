@@ -1,7 +1,7 @@
 asgiref==3.8.1
 asttokens==2.4.1
 branca==0.7.2
-certifi==2024.2.2
+certifi==2024.7.4
 cffi==1.16.0
 charset-normalizer==3.3.2
 comm==0.2.2
@@ -18,7 +18,7 @@ django-filter==24.2
 django-import-export==3.3.8
 django-leaflet==0.30.1
 django-seed==0.3.1
-djangorestframework==3.15.1
+djangorestframework==3.15.2
 djangorestframework-gis==1.0
 et-xmlfile==1.1.0
 executing==2.0.1
@@ -75,16 +75,16 @@ scipy==1.14.0
 setuptools==72.1.0
 shapely==2.0.4
 six==1.16.0
-sqlparse==0.4.4
+sqlparse==0.5.0
 stack-data==0.6.3
 tablib==3.5.0
 threadpoolctl==3.5.0
 toposort==1.10
-tornado==6.4
+tornado==6.4.2
 tqdm==4.66.4
 traitlets==5.14.3
 typing_extensions==4.10.0
-urllib3==2.2.1
+urllib3==2.2.2
 wcwidth==0.2.13
 websockets==12.0
 whitenoise==6.7.0
